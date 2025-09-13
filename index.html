@@ -2,30 +2,35 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ぷゆゲー</title>
+  <title>🥺バウンド（puyuyu統合）</title>
   <style>
     body {
       display: flex;
       justify-content: center;
-      margin-top: 20px;
-      background: #ffffff; /* 背景を白に戻す */
+      align-items: flex-start; /* 上寄せ */
+      height: 100vh;
+      margin: 0;
+      background: #ffffdd;
     }
     canvas {
-      border: 6px solid black;
-      background: #ffffff; /* キャンバス背景も白に */
+      border: 6px solid black; /* ← 枠太さ6px */
+      margin-top: 40px;
+      image-rendering: auto; /* アンチエイリアス優先 */
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="450" height="450"></canvas>
+  <canvas id="game" width="450" height="450"></canvas>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
+    const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
+    // 🥺設定
     const emoji = "🥺";
-    const fontSize = 40; // ← サイズを少し小さめに戻す
-    const emojiRadius = fontSize / 2;
+    const fontSize = 90; // 枠に合わせて調整
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     // 位置と速度
     let x = canvas.width / 2;
@@ -33,34 +38,48 @@
     let dx = 0;
     let dy = 0;
     let lastAngle = null;
-
-    // カウンター系
     let puyuyu = 0;
-    let clickPower = 1;   // クリック獲得数
-    let tapLevel = 1;     // タップレベル
-    let tapCost = 50;     // タップの値段
+    
+const emojiRadius = fontSize / 2;
 
+    function newDirection() {
+      let angle;
+      do {
+angle = Math.random() * 2 * Math.PI;
+} while (
+        lastAngle !== null &&
+Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
+);
+lastAngle = angle;
+return angle;
+       } 
+      
+    // カウンター
+    let puyuyu = 0;
+
+    // 当たり判定の半径（大体でOK）
+    const emojiRadius = fontSize / 2;
+
+    // 新しい角度を決める（前と似すぎない）
     function newDirection() {
       let angle;
       do {
         angle = Math.random() * 2 * Math.PI;
       } while (
         lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3) // 60度未満はNG
       );
       lastAngle = angle;
       return angle;
     }
 
-    // 🥺クリック処理
+// クリック判定（ズレ補正付き）
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const clickX = (e.clientX - rect.left) * scaleX;
       const clickY = (e.clientY - rect.top) * scaleY;
 
-      // 🥺クリック判定
       if (
         clickX >= x - emojiRadius &&
         clickX <= x + emojiRadius &&
@@ -71,79 +90,48 @@
         const speed = 2.0;
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
-        puyuyu += clickPower;
-      }
-
-      // タップ購入判定
-      const tapX = canvas.width - 150;
-      const tapY = canvas.height - 40;
-      const tapW = 140;
-      const tapH = 30;
-
-      if (
-        clickX >= tapX &&
-        clickX <= tapX + tapW &&
-        clickY >= tapY &&
-        clickY <= tapY + tapH
-      ) {
-        if (puyuyu >= tapCost) {
-          puyuyu -= tapCost;
-          tapLevel++;
-          clickPower = Math.floor(1 + clickPower * 0.1);
-          tapCost += Math.floor(tapCost * 0.1);
-        }
+        puyuyu++; // ← カウンター増加
       }
     });
 
-    // デバッグキー (Dキーで+500)
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "d" || e.key === "D") {
-        puyuyu += 500;
-      }
-    });
-
+    // ゲームループ
     function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 移動とバウンド
       x += dx;
       y += dy;
 
-      if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
-        dx = -dx;
-        x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
-      }
-      if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
-        dy = -dy;
-        y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
-      }
+// 壁バウンド
+// 左右の壁
+if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
+  dx = -dx;
+  x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
+}
 
-      // 🥺描画
-      ctx.save();
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = fontSize + "px serif";
-      ctx.fillText(emoji, x, y);
-      ctx.restore();
+// 上下の壁
+if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
+  dy = -dy;
+  y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
+}
 
-      // カウンター（左上）
-      ctx.save();
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.font = "20px sans-serif";
-      ctx.fillText("🥺 " + puyuyu, 8, 8);
-      ctx.restore();
 
-      // タップ購入ボタン（右下）
-      ctx.save();
-      ctx.textAlign = "right";
-      ctx.textBaseline = "bottom";
-      ctx.font = "18px sans-serif";
-      ctx.fillText("タップ(Lv" + tapLevel + ") 🥺" + tapCost, canvas.width - 10, canvas.height - 10);
-      ctx.restore();
+// 🥺描画（中心基準）
+ctx.save();
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+ctx.font = fontSize + "px serif";
+ctx.fillText(emoji, x, y);
+ctx.restore();
 
-      requestAnimationFrame(update);
-    }
+// カウンター描画（左上基準）
+ctx.save();
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.font = "16px sans-serif";
+ctx.fillText("🥺 " + puyuyu, 8, 8);
+ctx.restore();
+
+requestAnimationFrame(update);
+}
 
     update();
   </script>
