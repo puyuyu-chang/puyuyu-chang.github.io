@@ -2,10 +2,75 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>My GitHub Pages</title>
+  <title>クリッカーゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #fffbe6;
+    }
+    #emoji {
+      font-size: 80px;
+      cursor: pointer;
+    }
+    #stats {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h1>こんにちは GitHub Pages!</h1>
-  <p>これは最初のテストページです。</p>
+  <h1>😟クリッカー</h1>
+  <p>スコア: <span id="score">0</span></p>
+  <div id="emoji">😟</div>
+
+  <div id="stats">
+    <p>効率: <span id="efficiency">1</span></p>
+    <p>オート: <span id="auto">0</span></p>
+  </div>
+
+  <button id="upgrade">効率アップ(10)</button>
+  <button id="autoclick">オート追加(50)</button>
+
+  <script>
+    let score = 0;
+    let efficiency = 1;
+    let auto = 0;
+
+    const scoreEl = document.getElementById("score");
+    const efficiencyEl = document.getElementById("efficiency");
+    const autoEl = document.getElementById("auto");
+
+    document.getElementById("emoji").onclick = () => {
+      score += efficiency;
+      update();
+    };
+
+    document.getElementById("upgrade").onclick = () => {
+      if (score >= 10) {
+        score -= 10;
+        efficiency++;
+        update();
+      }
+    };
+
+    document.getElementById("autoclick").onclick = () => {
+      if (score >= 50) {
+        score -= 50;
+        auto++;
+        update();
+      }
+    };
+
+    function update() {
+      scoreEl.textContent = score;
+      efficiencyEl.textContent = efficiency;
+      autoEl.textContent = auto;
+    }
+
+    setInterval(() => {
+      score += auto;
+      update();
+    }, 1000);
+  </script>
 </body>
 </html>
