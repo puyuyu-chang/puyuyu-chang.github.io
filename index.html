@@ -8,11 +8,11 @@
       display: flex;
       justify-content: center;
       margin-top: 20px;
-      background: #fffff0;
+      background: #ffffff; /* 背景を白に戻す */
     }
     canvas {
       border: 6px solid black;
-      background: #ffffe0;
+      background: #ffffff; /* キャンバス背景も白に */
     }
   </style>
 </head>
@@ -24,7 +24,7 @@
     const ctx = canvas.getContext("2d");
 
     const emoji = "🥺";
-    const fontSize = 48;
+    const fontSize = 40; // ← サイズを少し小さめに戻す
     const emojiRadius = fontSize / 2;
 
     // 位置と速度
@@ -52,7 +52,7 @@
       return angle;
     }
 
-    // クリック処理
+    // 🥺クリック処理
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -74,7 +74,7 @@
         puyuyu += clickPower;
       }
 
-      // タップ購入判定（右下に配置したボタン領域）
+      // タップ購入判定
       const tapX = canvas.width - 150;
       const tapY = canvas.height - 40;
       const tapW = 140;
@@ -92,6 +92,13 @@
           clickPower = Math.floor(1 + clickPower * 0.1);
           tapCost += Math.floor(tapCost * 0.1);
         }
+      }
+    });
+
+    // デバッグキー (Dキーで+500)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "d" || e.key === "D") {
+        puyuyu += 500;
       }
     });
 
