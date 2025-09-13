@@ -80,19 +80,16 @@
       const buttonHeight = 40;
       const buttonX = canvas.width - buttonWidth - 10;
       const buttonY = canvas.height - buttonHeight - 10;
-      if (
-        clickX >= buttonX &&
-        clickX <= buttonX + buttonWidth &&
-        clickY >= buttonY &&
-        clickY <= buttonY + buttonHeight
-      ) {
-        if (puyuyu >= upgradeCost) {
-          puyuyu -= upgradeCost;
-          upgradeLevel++;
-          upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
-          clickValue = Math.floor(clickValue + clickValue * 0.1);
-        }
-      }
+if (clickX >= buttonX && clickX <= buttonX + buttonWidth &&
+    clickY >= buttonY && clickY <= buttonY + buttonHeight) {
+  if (puyuyu >= upgradeCost) {
+    puyuyu -= upgradeCost;
+    upgradeLevel++;
+    upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
+    clickValue = Math.floor(clickValue + clickValue * 0.1) + 1; // ← ここが修正点
+  }
+}
+
     });
 
     function update() {
@@ -129,10 +126,10 @@
       ctx.restore();
 
       // 強化ボタン描画
-      const buttonWidth = 160;
-      const buttonHeight = 40;
-      const buttonX = canvas.width - buttonWidth - 10;
-      const buttonY = canvas.height - buttonHeight - 10;
+//      const buttonWidth = 160;
+  //    const buttonHeight = 40;
+    //  const buttonX = canvas.width - buttonWidth - 10;
+      //const buttonY = canvas.height - buttonHeight - 10;
 
 ctx.save();
 
