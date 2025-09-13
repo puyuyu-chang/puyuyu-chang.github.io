@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（改良）</title>
+  <title>🥺バウンド（改良2）</title>
   <style>
     body {
       display: flex;
@@ -13,10 +13,9 @@
       background: #ffffdd;
     }
     canvas {
-      border: 5px solid black;
+      border: 8px solid black; /* ← 枠を少し太く */
       margin-top: 40px; /* 上に少し余白 */
-      /* アンチエイリアスを効かせる */
-      image-rendering: auto;
+      image-rendering: auto; /* アンチエイリアス */
     }
   </style>
 </head>
@@ -29,7 +28,7 @@
 
     // 🥺の設定
     const emoji = "🥺";
-    const fontSize = 100; // 少し大きく
+    const fontSize = 100; // 絵文字のサイズ
     ctx.font = fontSize + "px serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -42,7 +41,7 @@
     let lastAngle = null;
 
     // 絵文字の実際の当たり判定サイズ
-    const emojiRadius = fontSize / 2; // 半径として扱う（大体正方形内に収まる）
+    const emojiRadius = fontSize / 2;
 
     // クリックで方向を変える（前と似た角度は避ける）
     function newDirection() {
@@ -51,14 +50,13 @@
         angle = Math.random() * 2 * Math.PI;
       } while (
         lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 6)
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3) // ← 60度未満はNG
       );
       lastAngle = angle;
       return angle;
     }
 
     canvas.addEventListener("click", (e) => {
-      // クリック位置が 🥺の範囲内かどうか判定
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
@@ -70,7 +68,7 @@
         clickY <= y + emojiRadius
       ) {
         const angle = newDirection();
-        const speed = 2.0;
+        const speed = 2.0; // 速度
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
       }
@@ -81,7 +79,7 @@
       x += dx;
       y += dy;
 
-      // 枠の当たり判定（絵文字サイズを考慮）
+      // 枠の当たり判定
       if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
         dx = -dx;
         x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
@@ -91,7 +89,6 @@
         y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
       }
 
-      // 画面をクリアして再描画
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.font = fontSize + "px serif";
       ctx.fillText(emoji, x, y);
