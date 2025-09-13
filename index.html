@@ -2,25 +2,25 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（改良2）</title>
+  <title>🥺バウンド（puyuyu付き）</title>
   <style>
     body {
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* 上寄せ */
+      align-items: flex-start;
       height: 100vh;
       margin: 0;
       background: #ffffdd;
     }
     canvas {
-      border: 8px solid black; /* ← 枠を少し太く */
-      margin-top: 40px; /* 上に少し余白 */
-      image-rendering: auto; /* アンチエイリアス */
+      border: 6px solid black; /* ← 太さ6px */
+      margin-top: 40px;
+      image-rendering: auto;
     }
   </style>
 </head>
 <body>
-  <canvas id="game" width="500" height="500"></canvas>
+  <canvas id="game" width="450" height="450"></canvas> <!-- ← サイズ450px -->
 
   <script>
     const canvas = document.getElementById("game");
@@ -28,8 +28,7 @@
 
     // 🥺の設定
     const emoji = "🥺";
-    const fontSize = 100; // 絵文字のサイズ
-    ctx.font = fontSize + "px serif";
+    const fontSize = 90; // 枠に合わせて少し小さめ
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -40,27 +39,32 @@
     let dy = 0;
     let lastAngle = null;
 
-    // 絵文字の実際の当たり判定サイズ
+    // カウンター変数
+    let puyuyu = 0;
+
+    // 絵文字の当たり判定半径
     const emojiRadius = fontSize / 2;
 
-    // クリックで方向を変える（前と似た角度は避ける）
+    // ランダム方向を返す（前と60度以上違う）
     function newDirection() {
       let angle;
       do {
         angle = Math.random() * 2 * Math.PI;
       } while (
         lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3) // ← 60度未満はNG
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
       );
       lastAngle = angle;
       return angle;
     }
 
+    // クリック処理
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
+      // 🥺に当たったら
       if (
         clickX >= x - emojiRadius &&
         clickX <= x + emojiRadius &&
@@ -68,9 +72,11 @@
         clickY <= y + emojiRadius
       ) {
         const angle = newDirection();
-        const speed = 2.0; // 速度
+        const speed = 2.0;
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
+
+        puyuyu++; // ← カウントアップ
       }
     });
 
@@ -79,7 +85,7 @@
       x += dx;
       y += dy;
 
-      // 枠の当たり判定
+      // 壁バウンド
       if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
         dx = -dx;
         x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
@@ -89,10 +95,20 @@
         y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
       }
 
+      // 描画
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 🥺本体
       ctx.font = fontSize + "px serif";
       ctx.fillText(emoji, x, y);
 
+      // 左上にカウンター表示
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText("🥺 puyuyu: " + puyuyu, 8, 8);
+
+      // 次のフレームへ
       requestAnimationFrame(update);
     }
 
