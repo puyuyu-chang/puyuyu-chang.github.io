@@ -134,23 +134,28 @@
       const buttonX = canvas.width - buttonWidth - 10;
       const buttonY = canvas.height - buttonHeight - 10;
 
-      ctx.save();
-      ctx.fillStyle = "#fff";
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
-      ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+ctx.save();
 
-      ctx.fillStyle = "#000";
-      ctx.font = "16px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(
-        `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`,
-        buttonX + buttonWidth / 2,
-        buttonY + buttonHeight / 2
-      );
-      ctx.restore();
+// ボタン枠と背景
+ctx.fillStyle = "#fff";
+ctx.strokeStyle = "#000";
+ctx.lineWidth = 2;
+ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+// テキスト描画（スコア表示と同様のスタイル）
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.font = "16px sans-serif";
+ctx.fillStyle = "#000";
+ctx.fillText(
+  `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`,
+  buttonX + 8,
+  buttonY + 8
+);
+
+ctx.restore();
+
 
       requestAnimationFrame(update);
     }
