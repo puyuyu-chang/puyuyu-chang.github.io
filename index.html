@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（完全修正版）</title>
+  <title>🥺バウンド（クリック強化付き）</title>
   <style>
     body {
       display: flex;
@@ -34,7 +34,12 @@
     let dx = 0;
     let dy = 0;
     let lastAngle = null;
+
+    // スコア & 強化関連
     let puyuyu = 0;
+    let clickValue = 1;
+    let upgradeLevel = 1;
+    let upgradeCost = 50;
 
     function newDirection() {
       let angle;
@@ -48,6 +53,7 @@
       return angle;
     }
 
+    // 🥺クリックイベント
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -55,6 +61,7 @@
       const clickX = (e.clientX - rect.left) * scaleX;
       const clickY = (e.clientY - rect.top) * scaleY;
 
+      // 🥺をクリックした場合
       if (
         clickX >= x - emojiRadius &&
         clickX <= x + emojiRadius &&
@@ -62,22 +69,40 @@
         clickY <= y + emojiRadius
       ) {
         const angle = newDirection();
-        const speed = 2.0; // 速度
+        const speed = 2.0;
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
-        puyuyu++;
+        puyuyu += clickValue;
+      }
+
+      // 強化ボタンをクリックした場合
+      const buttonWidth = 160;
+      const buttonHeight = 40;
+      const buttonX = canvas.width - buttonWidth - 10;
+      const buttonY = canvas.height - buttonHeight - 10;
+      if (
+        clickX >= buttonX &&
+        clickX <= buttonX + buttonWidth &&
+        clickY >= buttonY &&
+        clickY <= buttonY + buttonHeight
+      ) {
+        if (puyuyu >= upgradeCost) {
+          puyuyu -= upgradeCost;
+          upgradeLevel++;
+          upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
+          clickValue = Math.floor(clickValue + clickValue * 0.1);
+        }
       }
     });
 
     function update() {
-      // キャンバスを完全クリア
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // 🥺の位置更新
       x += dx;
       y += dy;
 
-      // 壁バウンド（真反対の角度）
+      // 壁バウンド
       if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
         dx = -dx;
         x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
@@ -87,7 +112,7 @@
         y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
       }
 
-      // 🥺描画（中心基準）
+      // 🥺描画
       ctx.save();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -95,12 +120,36 @@
       ctx.fillText(emoji, x, y);
       ctx.restore();
 
-      // カウンター表示（左上）
+      // スコア表示
       ctx.save();
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.font = "16px sans-serif";
+      ctx.font = "20px sans-serif";
       ctx.fillText("🥺 " + puyuyu, 8, 8);
+      ctx.restore();
+
+      // 強化ボタン描画
+      const buttonWidth = 160;
+      const buttonHeight = 40;
+      const buttonX = canvas.width - buttonWidth - 10;
+      const buttonY = canvas.height - buttonHeight - 10;
+
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+      ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+      ctx.fillStyle = "#000";
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`,
+        buttonX + buttonWidth / 2,
+        buttonY + buttonHeight / 2
+      );
       ctx.restore();
 
       requestAnimationFrame(update);
