@@ -121,24 +121,61 @@ if (clickX >= buttonX && clickX <= buttonX + buttonWidth &&
       ctx.save();
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.font = "20px sans-serif";
+      ctx.font = "22px sans-serif";
       ctx.fillText("🥺 " + puyuyu, 8, 8);
       ctx.restore();
 
       // 強化ボタン描画
-      const buttonWidth = 160;
-      const buttonHeight = 40;
-      const buttonX = canvas.width - buttonWidth - 10;
-      const buttonY = canvas.height - buttonHeight - 10;
-      
+// 強化ラベルのテキストとスタイル
+const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
+const labelFontSize = 22;
 ctx.save();
-ctx.globalAlpha = 0.6; // 半透明にする
+ctx.font = `${labelFontSize}px sans-serif`;
 ctx.textAlign = "left";
 ctx.textBaseline = "top";
-ctx.font = "16px sans-serif";
-ctx.fillStyle = "#000"; // 黒文字
-ctx.fillText(`タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`, buttonX, buttonY);
+ctx.globalAlpha = 0.6;
+ctx.fillStyle = "#000";
+
+// 表示位置（右下寄り）
+const labelX = canvas.width - 200;
+const labelY = canvas.height - 40;
+
+// 描画
+ctx.fillText(labelText, labelX, labelY);
+
+// 一時的な赤枠（当たり判定の確認用）
+const metrics = ctx.measureText(labelText);
+const textWidth = metrics.width;
+const textHeight = labelFontSize; // 高さはフォントサイズで近似
+ctx.globalAlpha = 1.0;
+ctx.strokeStyle = "red";
+ctx.lineWidth = 1;
+ctx.strokeRect(labelX, labelY, textWidth, textHeight);
+
 ctx.restore();
+
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const clickX = (e.clientX - rect.left) * scaleX;
+  const clickY = (e.clientY - rect.top) * scaleY;
+
+  // 判定範囲と一致
+  if (
+    clickX >= labelX &&
+    clickX <= labelX + textWidth &&
+    clickY >= labelY &&
+    clickY <= labelY + textHeight
+  ) {
+    if (puyuyu >= upgradeCost) {
+      puyuyu -= upgradeCost;
+      upgradeLevel++;
+      upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
+      clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
+    }
+  }
+});
 
 
 
