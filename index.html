@@ -2,94 +2,81 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド改</title>
+  <title>🥺バウンド（Canvas版）</title>
   <style>
     body {
-      margin: 0;
-      background: #fffbe6;
-    }
-    #game {
-      position: relative;
-      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
-      border: 5px solid black;
+      margin: 0;
       background: #ffffdd;
-      overflow: hidden;
     }
-    #emoji {
-      position: absolute;
-      font-size: 80px; /* 少し大きく */
-      user-select: none;
-      cursor: pointer;
+    canvas {
+      border: 5px solid black;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-  <div id="game">
-    <div id="emoji">🥺</div>
-  </div>
+  <canvas id="game" width="400" height="400"></canvas>
 
   <script>
-    const game = document.getElementById("game");
-    const emoji = document.getElementById("emoji");
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-    let rect = emoji.getBoundingClientRect();
-    let emojiSize = rect.width; // 実際の描画幅
-    let gameWidth = game.clientWidth;
-    let gameHeight = game.clientHeight;
-
-    let x = (gameWidth - emojiSize) / 2;
-    let y = (gameHeight - emojiSize) / 2;
+    let x = 200; // 絵文字の位置（中心）
+    let y = 200;
     let dx = 0;
     let dy = 0;
     let lastAngle = null;
 
-    // 初期配置
-    emoji.style.left = x + "px";
-    emoji.style.top = y + "px";
+    const emoji = "🥺";
+    const fontSize = 80; // 絵文字サイズ
+    ctx.font = fontSize + "px serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-    // ランダム角度生成（前回と似ない）
     function newDirection() {
       let angle;
       do {
         angle = Math.random() * 2 * Math.PI;
       } while (
         lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 6) // 30度以内はやり直し
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 6)
       );
       lastAngle = angle;
       return angle;
     }
 
-    // クリックで方向変更
-    emoji.addEventListener("click", () => {
+    canvas.addEventListener("click", () => {
       const angle = newDirection();
-      const speed = 2.0; // 速度を落とす
+      const speed = 2.0; // 遅めに
       dx = Math.cos(angle) * speed;
       dy = Math.sin(angle) * speed;
     });
 
     function update() {
-      gameWidth = game.clientWidth;
-      gameHeight = game.clientHeight;
-      rect = emoji.getBoundingClientRect();
-      emojiSize = rect.width;
-
       x += dx;
       y += dy;
 
-      // 壁反射
-      if (x <= 0 || x + emojiSize >= gameWidth) {
+      // 枠のサイズを考慮
+      const padding = fontSize / 2;
+      if (x <= padding || x >= canvas.width - padding) {
         dx = -dx;
-        x = Math.max(0, Math.min(x, gameWidth - emojiSize));
+        x = Math.max(padding, Math.min(x, canvas.width - padding));
       }
-      if (y <= 0 || y + emojiSize >= gameHeight) {
+      if (y <= padding || y >= canvas.height - padding) {
         dy = -dy;
-        y = Math.max(0, Math.min(y, gameHeight - emojiSize));
+        y = Math.max(padding, Math.min(y, canvas.height - padding));
       }
 
-      emoji.style.left = x + "px";
-      emoji.style.top = y + "px";
+      // 描画クリア
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 🥺を描画
+      ctx.font = fontSize + "px serif";
+      ctx.fillText(emoji, x, y);
 
       requestAnimationFrame(update);
     }
