@@ -136,25 +136,14 @@ ctx.textBaseline = "top";
 ctx.globalAlpha = 0.6;
 ctx.fillStyle = "#000";
 
-// 表示位置（右下寄り）
+// グローバルに強化ボタン判定用の範囲を保持
+const labelFontSize = 22;
 const labelX = canvas.width - 200;
 const labelY = canvas.height - 40;
+let labelWidth;  // 後で update() 内で計算
+const labelHeight = labelFontSize;
 
-// 描画
-ctx.fillText(labelText, labelX, labelY);
-
-// 一時的な赤枠（当たり判定の確認用）
-const metrics = ctx.measureText(labelText);
-const textWidth = metrics.width;
-const textHeight = labelFontSize; // 高さはフォントサイズで近似
-ctx.globalAlpha = 1.0;
-ctx.strokeStyle = "red";
-ctx.lineWidth = 1;
-ctx.strokeRect(labelX, labelY, textWidth, textHeight);
-
-ctx.restore();
-
-// 🥺クリックイベント + 強化ボタン判定
+// クリックイベントは1回だけ登録
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -162,7 +151,7 @@ canvas.addEventListener("click", (e) => {
   const clickX = (e.clientX - rect.left) * scaleX;
   const clickY = (e.clientY - rect.top) * scaleY;
 
-  // 🥺をクリックした場合
+  // 🥺クリック判定
   if (
     clickX >= x - emojiRadius &&
     clickX <= x + emojiRadius &&
@@ -176,19 +165,12 @@ canvas.addEventListener("click", (e) => {
     puyuyu += clickValue;
   }
 
-  // 強化ボタンをクリックした場合
-  const labelFontSize = 22;
-  const labelX = canvas.width - 200;
-  const labelY = canvas.height - 40;
-  const metrics = ctx.measureText(`タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`);
-  const textWidth = metrics.width;
-  const textHeight = labelFontSize;
-
+  // 強化ボタンクリック判定
   if (
     clickX >= labelX &&
-    clickX <= labelX + textWidth &&
+    clickX <= labelX + labelWidth &&
     clickY >= labelY &&
-    clickY <= labelY + textHeight
+    clickY <= labelY + labelHeight
   ) {
     if (puyuyu >= upgradeCost) {
       puyuyu -= upgradeCost;
@@ -199,10 +181,26 @@ canvas.addEventListener("click", (e) => {
   }
 });
 
+// update 内でラベル幅だけ計算
+function update() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // 🥺の位置更新・描画（省略）
 
-      requestAnimationFrame(update);
-    }
+  // 強化ボタン描画
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
+  ctx.fillStyle = "#000";
+  ctx.fillText(labelText, labelX, labelY);
+  labelWidth = ctx.measureText(labelText).width; // 幅だけ毎フレーム更新
+  ctx.restore();
+
+  requestAnimationFrame(update);
+}
+
 
     update();
   </script>
