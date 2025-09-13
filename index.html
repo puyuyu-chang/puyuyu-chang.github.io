@@ -25,22 +25,30 @@
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
+    // 🥺関連
     const emoji = "🥺";
     const fontSize = 90;
     const emojiRadius = fontSize / 2;
-
     let x = canvas.width / 2;
     let y = canvas.height / 2;
     let dx = 0;
     let dy = 0;
     let lastAngle = null;
 
-    // スコア & 強化関連
+    // スコア & 強化
     let puyuyu = 0;
     let clickValue = 1;
     let upgradeLevel = 1;
     let upgradeCost = 50;
 
+    // 強化ボタン表示位置・サイズ
+    const labelFontSize = 22;
+    const labelX = canvas.width - 200;
+    const labelY = canvas.height - 40;
+    let labelWidth = 0;
+    const labelHeight = labelFontSize;
+
+    // ランダム方向生成（前回とあまり近くならやり直し）
     function newDirection() {
       let angle;
       do {
@@ -53,7 +61,7 @@
       return angle;
     }
 
-    // 🥺クリックイベント
+    // クリックイベント（中央🥺と強化ボタン）
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -61,7 +69,7 @@
       const clickX = (e.clientX - rect.left) * scaleX;
       const clickY = (e.clientY - rect.top) * scaleY;
 
-      // 🥺をクリックした場合
+      // 🥺クリック判定
       if (
         clickX >= x - emojiRadius &&
         clickX <= x + emojiRadius &&
@@ -75,27 +83,27 @@
         puyuyu += clickValue;
       }
 
-      // 強化ボタンをクリックした場合
-      const buttonWidth = 160;
-      const buttonHeight = 40;
-      const buttonX = canvas.width - buttonWidth - 10;
-      const buttonY = canvas.height - buttonHeight - 10;
-if (clickX >= buttonX && clickX <= buttonX + buttonWidth &&
-    clickY >= buttonY && clickY <= buttonY + buttonHeight) {
-  if (puyuyu >= upgradeCost) {
-    puyuyu -= upgradeCost;
-    upgradeLevel++;
-    upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
-    clickValue = Math.floor(clickValue + clickValue * 0.1) + 1; // ← ここが修正点
-  }
-}
-
+      // 強化ボタンクリック判定
+      if (
+        clickX >= labelX &&
+        clickX <= labelX + labelWidth &&
+        clickY >= labelY &&
+        clickY <= labelY + labelHeight
+      ) {
+        if (puyuyu >= upgradeCost) {
+          puyuyu -= upgradeCost;
+          upgradeLevel++;
+          upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
+          clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
+        }
+      }
     });
 
+    // 描画・更新ループ
     function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 🥺の位置更新
+      // 🥺位置更新
       x += dx;
       y += dy;
 
@@ -117,90 +125,30 @@ if (clickX >= buttonX && clickX <= buttonX + buttonWidth &&
       ctx.fillText(emoji, x, y);
       ctx.restore();
 
-      // スコア表示
+      // スコア表示（左上）
       ctx.save();
+      ctx.font = "22px sans-serif";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.font = "22px sans-serif";
       ctx.fillText("🥺 " + puyuyu, 8, 8);
       ctx.restore();
 
-      // 強化ボタン描画
-// 強化ラベルのテキストとスタイル
-const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
-const labelFontSize = 22;
-ctx.save();
-ctx.font = `${labelFontSize}px sans-serif`;
-ctx.textAlign = "left";
-ctx.textBaseline = "top";
-ctx.globalAlpha = 0.6;
-ctx.fillStyle = "#000";
+      // 強化ボタン描画（右下）
+      const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
+      ctx.save();
+      ctx.font = `${labelFontSize}px sans-serif`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "#000";
+      ctx.globalAlpha = 0.7;
+      ctx.fillText(labelText, labelX, labelY);
+      ctx.globalAlpha = 1.0;
+      // 幅を計算して判定に使う
+      labelWidth = ctx.measureText(labelText).width;
+      ctx.restore();
 
-// グローバルに強化ボタン判定用の範囲を保持
-const labelFontSize = 22;
-const labelX = canvas.width - 200;
-const labelY = canvas.height - 40;
-let labelWidth;  // 後で update() 内で計算
-const labelHeight = labelFontSize;
-
-// クリックイベントは1回だけ登録
-canvas.addEventListener("click", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const clickX = (e.clientX - rect.left) * scaleX;
-  const clickY = (e.clientY - rect.top) * scaleY;
-
-  // 🥺クリック判定
-  if (
-    clickX >= x - emojiRadius &&
-    clickX <= x + emojiRadius &&
-    clickY >= y - emojiRadius &&
-    clickY <= y + emojiRadius
-  ) {
-    const angle = newDirection();
-    const speed = 2.0;
-    dx = Math.cos(angle) * speed;
-    dy = Math.sin(angle) * speed;
-    puyuyu += clickValue;
-  }
-
-  // 強化ボタンクリック判定
-  if (
-    clickX >= labelX &&
-    clickX <= labelX + labelWidth &&
-    clickY >= labelY &&
-    clickY <= labelY + labelHeight
-  ) {
-    if (puyuyu >= upgradeCost) {
-      puyuyu -= upgradeCost;
-      upgradeLevel++;
-      upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
-      clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
+      requestAnimationFrame(update);
     }
-  }
-});
-
-// update 内でラベル幅だけ計算
-function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 🥺の位置更新・描画（省略）
-
-  // 強化ボタン描画
-  ctx.save();
-  ctx.font = `${labelFontSize}px sans-serif`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
-  ctx.fillStyle = "#000";
-  ctx.fillText(labelText, labelX, labelY);
-  labelWidth = ctx.measureText(labelText).width; // 幅だけ毎フレーム更新
-  ctx.restore();
-
-  requestAnimationFrame(update);
-}
-
 
     update();
   </script>
