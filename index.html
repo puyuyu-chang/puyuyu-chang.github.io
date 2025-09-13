@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>🥺バウンド（当たり判定修正）</title>
+  <meta charset="UTF-8">
+  <title>🥺バウンド（改良2）</title>
   <style>
     body {
       display: flex;
@@ -13,143 +13,89 @@
       background: #ffffdd;
     }
     canvas {
-      border: 6px solid black; /* 枠太さ6px */
-      margin-top: 40px;
-      image-rendering: auto; /* アンチエイリアス優先 */
+      border: 8px solid black; /* ← 枠を少し太く */
+      margin-top: 40px; /* 上に少し余白 */
+      image-rendering: auto; /* アンチエイリアス */
     }
   </style>
 </head>
 <body>
-  <canvas id="game" width="450" height="450"></canvas>
+  <canvas id="game" width="500" height="500"></canvas>
 
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
+    // 🥺の設定
     const emoji = "🥺";
-    const fontSize = 90; // メイン絵文字サイズ
-    ctx.fillStyle = "#000"; // 描画色
+    const fontSize = 100; // 絵文字のサイズ
+    ctx.font = fontSize + "px serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-    // puyuyu カウント
-    let puyuyu = 0;
-
-    // 位置・速度
+    // 座標と速度
     let x = canvas.width / 2;
     let y = canvas.height / 2;
     let dx = 0;
     let dy = 0;
     let lastAngle = null;
 
-    // 絵文字の描画矩形（幅/高さ）を取得する関数
-    function measureEmoji() {
-      ctx.font = `${fontSize}px serif`;
-      const m = ctx.measureText(emoji);
+    // 絵文字の実際の当たり判定サイズ
+    const emojiRadius = fontSize / 2;
 
-      const width = m.width || fontSize; // 幅（フォールバックあり）
-      // 高さは actualBoundingBox があれば使い、なければ fontSize を使う
-      const height = (typeof m.actualBoundingBoxAscent === "number" && typeof m.actualBoundingBoxDescent === "number")
-        ? (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent)
-        : fontSize;
-
-      return { width, height };
-    }
-
-    // 最初に計測
-    let metrics = measureEmoji();
-    let halfW = metrics.width / 2;
-    let halfH = metrics.height / 2;
-
-    // 角度生成（前回と似すぎない：60度以上違うものを選ぶ）
+    // クリックで方向を変える（前と似た角度は避ける）
     function newDirection() {
       let angle;
       do {
         angle = Math.random() * 2 * Math.PI;
       } while (
         lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3) // ← 60度未満はNG
       );
       lastAngle = angle;
       return angle;
     }
 
-    // クリック判定（キャンバス座標で判定）
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // 再計測（環境によって最初の計測と差が出る場合があるため安全策）
-      metrics = measureEmoji();
-      halfW = metrics.width / 2;
-      halfH = metrics.height / 2;
-
-      // 描画時は (x,y) を中心にして左上座標を決定しているのでそれを使って矩形判定
-      const drawX = x - halfW;
-      const drawY = y - halfH;
-
       if (
-        clickX >= drawX &&
-        clickX <= drawX + metrics.width &&
-        clickY >= drawY &&
-        clickY <= drawY + metrics.height
+        clickX >= x - emojiRadius &&
+        clickX <= x + emojiRadius &&
+        clickY >= y - emojiRadius &&
+        clickY <= y + emojiRadius
       ) {
-        // 当たり：方向を変え、速度を設定、puyuyu を +1
         const angle = newDirection();
-        const speed = 2.0;
+        const speed = 2.0; // 速度
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
-        puyuyu++;
       }
     });
 
-    // ループ
+    // ゲームループ
     function update() {
-      // 位置更新
       x += dx;
       y += dy;
 
-      // 再計測（念のためフレームごとに計測して幅高さを最新に）
-      metrics = measureEmoji();
-      halfW = metrics.width / 2;
-      halfH = metrics.height / 2;
-
-      // 壁反射（矩形の端がキャンバス外に出ないように）
-      if (x - halfW <= 0) {
+      // 枠の当たり判定
+      if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
         dx = -dx;
-        x = halfW;
-      } else if (x + halfW >= canvas.width) {
-        dx = -dx;
-        x = canvas.width - halfW;
+        x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
       }
-      if (y - halfH <= 0) {
+      if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
         dy = -dy;
-        y = halfH;
-      } else if (y + halfH >= canvas.height) {
-        dy = -dy;
-        y = canvas.height - halfH;
+        y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
       }
 
-      // 描画
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // メイン絵文字（左上基準で描画するため drawX/drawY を計算）
-      ctx.font = `${fontSize}px serif`;
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const drawX = x - halfW;
-      const drawY = y - halfH;
-      ctx.fillText(emoji, drawX, drawY);
-
-      // 左上に小さく "🥺 <数値>" を表示（"puyuyu:" 部分は表示しない）
-      ctx.font = "16px sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText("🥺 " + puyuyu, 8, 8);
+      ctx.font = fontSize + "px serif";
+      ctx.fillText(emoji, x, y);
 
       requestAnimationFrame(update);
     }
 
-    // 開始
     update();
   </script>
 </body>
