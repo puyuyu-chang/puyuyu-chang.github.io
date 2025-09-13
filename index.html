@@ -82,14 +82,18 @@
       y += dy;
 
       // 壁バウンド
-      if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
-        dx = -dx;
-        x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
-      }
-      if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
-        dy = -dy;
-        y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
-      }
+// 左右の壁
+if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
+  dx = -dx;
+  x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
+}
+
+// 上下の壁
+if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
+  dy = -dy;
+  y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
+}
+
 
   // 🥺描画（中心基準）
   ctx.save();
