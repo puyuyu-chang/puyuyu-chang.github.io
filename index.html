@@ -2,27 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド</title>
+  <title>🥺バウンド改</title>
   <style>
     body {
-      background: #fffbe6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      background: #fffbe6;
     }
     #game {
       position: relative;
-      width: 400px;
-      height: 400px;
+      width: 100vw;
+      height: 100vh;
       border: 5px solid black;
       background: #ffffdd;
       overflow: hidden;
     }
     #emoji {
       position: absolute;
-      font-size: 64px;
+      font-size: 80px; /* 少し大きく */
       user-select: none;
       cursor: pointer;
     }
@@ -37,35 +33,52 @@
     const game = document.getElementById("game");
     const emoji = document.getElementById("emoji");
 
-    // ゲーム領域のサイズ
-    const gameWidth = game.clientWidth;
-    const gameHeight = game.clientHeight;
+    let rect = emoji.getBoundingClientRect();
+    let emojiSize = rect.width; // 実際の描画幅
+    let gameWidth = game.clientWidth;
+    let gameHeight = game.clientHeight;
 
-    // 絵文字の大きさを取得
-    let emojiSize = 64; // フォントサイズに合わせておおよそ
     let x = (gameWidth - emojiSize) / 2;
     let y = (gameHeight - emojiSize) / 2;
-    let dx = 0; // 移動方向X
-    let dy = 0; // 移動方向Y
+    let dx = 0;
+    let dy = 0;
+    let lastAngle = null;
 
-    // 初期位置を中央に設定
+    // 初期配置
     emoji.style.left = x + "px";
     emoji.style.top = y + "px";
 
-    // クリックでランダムな角度を設定
+    // ランダム角度生成（前回と似ない）
+    function newDirection() {
+      let angle;
+      do {
+        angle = Math.random() * 2 * Math.PI;
+      } while (
+        lastAngle !== null &&
+        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 6) // 30度以内はやり直し
+      );
+      lastAngle = angle;
+      return angle;
+    }
+
+    // クリックで方向変更
     emoji.addEventListener("click", () => {
-      const angle = Math.random() * 2 * Math.PI;
-      const speed = 3; // 移動速度
+      const angle = newDirection();
+      const speed = 2.0; // 速度を落とす
       dx = Math.cos(angle) * speed;
       dy = Math.sin(angle) * speed;
     });
 
-    // 移動処理
     function update() {
+      gameWidth = game.clientWidth;
+      gameHeight = game.clientHeight;
+      rect = emoji.getBoundingClientRect();
+      emojiSize = rect.width;
+
       x += dx;
       y += dy;
 
-      // 壁に当たったら跳ね返る
+      // 壁反射
       if (x <= 0 || x + emojiSize >= gameWidth) {
         dx = -dx;
         x = Math.max(0, Math.min(x, gameWidth - emojiSize));
