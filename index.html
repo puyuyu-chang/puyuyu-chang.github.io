@@ -154,6 +154,7 @@ ctx.strokeRect(labelX, labelY, textWidth, textHeight);
 
 ctx.restore();
 
+// 🥺クリックイベント + 強化ボタン判定
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -161,7 +162,28 @@ canvas.addEventListener("click", (e) => {
   const clickX = (e.clientX - rect.left) * scaleX;
   const clickY = (e.clientY - rect.top) * scaleY;
 
-  // 判定範囲と一致
+  // 🥺をクリックした場合
+  if (
+    clickX >= x - emojiRadius &&
+    clickX <= x + emojiRadius &&
+    clickY >= y - emojiRadius &&
+    clickY <= y + emojiRadius
+  ) {
+    const angle = newDirection();
+    const speed = 2.0;
+    dx = Math.cos(angle) * speed;
+    dy = Math.sin(angle) * speed;
+    puyuyu += clickValue;
+  }
+
+  // 強化ボタンをクリックした場合
+  const labelFontSize = 22;
+  const labelX = canvas.width - 200;
+  const labelY = canvas.height - 40;
+  const metrics = ctx.measureText(`タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`);
+  const textWidth = metrics.width;
+  const textHeight = labelFontSize;
+
   if (
     clickX >= labelX &&
     clickX <= labelX + textWidth &&
