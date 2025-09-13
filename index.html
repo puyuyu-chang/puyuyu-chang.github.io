@@ -89,19 +89,24 @@
         y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
       }
 
-      // 描画
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = fontSize + "px serif";
-      ctx.fillText(emoji, x, y);
+  // 🥺描画（中心基準）
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = fontSize + "px serif";
+  ctx.fillText(emoji, x, y);
+  ctx.restore();
 
-      // カウンター表示
-      ctx.font = "16px sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText("🥺 " + puyuyu, 8, 8);
+  // カウンター描画（左上基準）
+  ctx.save();
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.font = "16px sans-serif";
+  ctx.fillText("🥺 " + puyuyu, 8, 8);
+  ctx.restore();
 
-      requestAnimationFrame(update);
-    }
+  requestAnimationFrame(update);
+}
 
     update();
   </script>
