@@ -13,14 +13,16 @@
   top: 50px;
   left: 50%;
   transform: translateX(-50%);
-  width: 480px;        /* 幅 */
-  height: 480px;       /* 高さを幅と同じにして1:1の正方形 */
+  width: 400px;        /* 幅 */
+  height: 400px;       /* 高さを幅と同じにして1:1の正方形 */
   background: #FFF9C4;
   border: none;        /* 黒縁を削除 */
   border-radius: 8px;
   padding: 10px;
+  display: none; /* 最初は非表示 */
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
 .shopItem {
@@ -29,7 +31,7 @@
   background: #FFFFEE;
   margin: 4px 0;
   padding: 0 6px;          /* 上下パディングをなくして比率維持 */
-  aspect-ratio: 10 / 1;    /* 幅10 : 高さ1 → 高さは幅の10% */
+  aspect-ratio: 9 / 1;    /* 幅9 : 高さ1 → 高さは幅の9% */
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
