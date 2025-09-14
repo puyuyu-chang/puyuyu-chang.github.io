@@ -45,6 +45,13 @@
   .shopItem span.icon {
     font-size: 20px;  /* アイコンを大きめに */
     margin-right: 8px;
+
+      /* ── アイコンをずらす方法 A: position + top/left ── */
+  position: relative;   /* relative を効かせる */
+  top:    2px;
+  left:   2px;
+
+    
   }
   .shopItem span.price {
   margin-left: 0;                /* ← もともと margin-left: auto; を置き換え */
