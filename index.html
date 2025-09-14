@@ -74,6 +74,26 @@ let wallValue = 0;        // 壁に跳ね返ったときに獲得するpuyuyu
       const clickX = (e.clientX - rect.left) * scaleX;
       const clickY = (e.clientY - rect.top) * scaleY;
 
+      // 壁タッチボタンのクリック判定
+if (
+  clickX >= wallLabelX &&
+  clickX <= wallLabelX + wallLabelWidth &&
+  clickY >= wallLabelY &&
+  clickY <= wallLabelY + labelHei
+  
+  
+  
+  ght
+) {
+  if (puyuyu >= wallCost) {
+    puyuyu -= wallCost;
+    wallLevel++;
+    wallCost = Math.floor(wallCost + wallCost * 0.1);
+    wallValue = Math.floor(wallValue + wallValue * 0.1) + 1; // タップ強化と同じ計算式
+  }
+}
+
+      
       // 🥺クリック判定
       if (
         clickX >= x - emojiRadius &&
@@ -125,7 +145,23 @@ if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
   puyuyu += wallValue;
 }
 
+// 壁タッチボタン描画（右下のタップ強化の上）
+const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
+const wallLabelX = canvas.width - 200;
+const wallLabelY = canvas.height - 80; // タップ強化の上
 
+ctx.save();
+ctx.font = `${labelFontSize}px sans-serif`;
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.fillStyle = "#000";
+ctx.globalAlpha = 0.7;
+ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
+ctx.globalAlpha = 1.0;
+wallLabelWidth = ctx.measureText(wallLabelText).width; // 判定用
+ctx.restore();
+
+      
       // 🥺描画
       ctx.save();
       ctx.textAlign = "center";
@@ -156,34 +192,7 @@ if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
       labelWidth = ctx.measureText(labelText).width;
       ctx.restore();
 
-      const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
-const wallLabelX = canvas.width - 200;
-const wallLabelY = canvas.height - 80; // タップ強化の上に表示
 
-ctx.save();
-ctx.font = `${labelFontSize}px sans-serif`;
-ctx.textAlign = "left";
-ctx.textBaseline = "top";
-ctx.fillStyle = "#000";
-ctx.globalAlpha = 0.7;
-ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
-ctx.globalAlpha = 1.0;
-wallLabelWidth = ctx.measureText(wallLabelText).width; // 判定用
-ctx.restore();
-
-if (
-  clickX >= wallLabelX &&
-  clickX <= wallLabelX + wallLabelWidth &&
-  clickY >= wallLabelY &&
-  clickY <= wallLabelY + labelHeight
-) {
-  if (puyuyu >= wallCost) {
-    puyuyu -= wallCost;
-    wallLevel++;
-    wallCost = Math.floor(wallCost + wallCost * 0.1);
-    wallValue = Math.floor(wallValue + wallValue * 0.1) + 1; // タップ強化と同じ計算式
-  }
-}
 
       
       requestAnimationFrame(update);
