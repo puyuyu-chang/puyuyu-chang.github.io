@@ -139,7 +139,7 @@
     }
   });
 
-  // アイテム描画
+    // アイテム描画
   function renderShop() {
     shopItemsDiv.innerHTML = "";
     const start = currentPage * itemsPerPage;
@@ -151,7 +151,7 @@
       div.className = "shopItem";
       div.innerHTML = `
         <span class="icon">${item.icon}</span>
-        🥺を${item.effect}%効率化</span>
+        <span>${item.icon}を${item.effect}%効率化</span>
         <span class="price">🥺${item.price}</span>
       `;
       div.addEventListener("click", () => buyItem(start + index));
