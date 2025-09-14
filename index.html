@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（右端基準・壁タッチ＆クリック強化付き）</title>
+  <title>🥺バウンド（右端基準・デバッグ＆ショップ追加）</title>
   <style>
     body {
       display: flex;
@@ -50,6 +50,10 @@ let wallValue = 0;
 const labelFontSize = 22;
 const labelHeight = labelFontSize;
 
+// ラベル幅（クリック判定用）
+let wallLabelWidth = 0;
+let tapLabelWidth = 0;
+
 // ランダム方向生成
 function newDirection() {
   let angle;
@@ -62,6 +66,13 @@ function newDirection() {
   lastAngle = angle;
   return angle;
 }
+
+// キーイベント（Dキーでデバッグpuyuyu2倍）
+document.addEventListener("keydown", (e) => {
+  if (e.key === "d" || e.key === "D") {
+    puyuyu *= 2;
+  }
+});
 
 // クリックイベント（中央🥺と強化ボタン）
 canvas.addEventListener("click", (e) => {
@@ -85,8 +96,8 @@ canvas.addEventListener("click", (e) => {
     puyuyu += clickValue;
   }
 
-  // 壁タッチクリック判定（右端基準）
-  const wallLabelX = canvas.width - 10; // 右端10px内側
+  // 壁タッチクリック判定
+  const wallLabelX = canvas.width - 10; // 右端基準
   const wallLabelY = canvas.height - 80;
   if (
     clickX >= wallLabelX - wallLabelWidth &&
@@ -102,8 +113,8 @@ canvas.addEventListener("click", (e) => {
     }
   }
 
-  // タップ強化クリック判定（右端基準）
-  const tapLabelX = canvas.width - 10; // 右端10px内側
+  // タップ強化クリック判定
+  const tapLabelX = canvas.width - 10;
   const tapLabelY = canvas.height - 40;
   if (
     clickX >= tapLabelX - tapLabelWidth &&
@@ -121,9 +132,6 @@ canvas.addEventListener("click", (e) => {
 });
 
 // 描画・更新ループ
-let wallLabelWidth = 0;
-let tapLabelWidth = 0;
-
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -157,6 +165,20 @@ function update() {
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText("🥺 " + puyuyu, 8, 8);
+  ctx.restore();
+
+  // 「ショップ」表示（壁タッチ上）
+  const shopText = "ショップ";
+  const shopX = canvas.width - 10;
+  const shopY = canvas.height - 110;
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#000";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(shopText, shopX, shopY);
+  ctx.globalAlpha = 1.0;
   ctx.restore();
 
   // 壁タッチボタン描画（右端基準）
