@@ -89,7 +89,7 @@ if (
     puyuyu += clickValue;
   }
 
-  // 壁タッチ強化ボタン判定
+// 壁タッチクリック判定
 if (
   clickX >= wallLabelX - wallLabelWidth &&
   clickX <= wallLabelX &&
@@ -104,13 +104,14 @@ if (
     }
   }
 
-  // タップ強化ボタン判定
-  if (
-    clickX >= labelX &&
-    clickX <= labelX + labelWidth &&
-    clickY >= labelY &&
-    clickY <= labelY + labelHeight
-  ) {
+ 
+// タップクリック判定
+if (
+  clickX >= tapLabelX - labelWidth &&
+  clickX <= tapLabelX &&
+  clickY >= tapLabelY &&
+  clickY <= tapLabelY + labelHeight
+) {
     if (puyuyu >= upgradeCost) {
       puyuyu -= upgradeCost;
       upgradeLevel++;
