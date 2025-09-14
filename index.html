@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（壁タッチ＆クリック強化付き）</title>
+  <title>🥺バウンド（右端基準・壁タッチ＆クリック強化付き）</title>
   <style>
     body {
       display: flex;
@@ -45,16 +45,12 @@ let upgradeCost = 50;
 let wallLevel = 1;
 let wallCost = 100;
 let wallValue = 0;
-let wallLabelWidth = 0;
 
-// 強化ボタン表示位置・サイズ
+// 強化ボタン表示サイズ
 const labelFontSize = 22;
-const labelX = canvas.width - 200;
-const labelY = canvas.height - 40;
-let labelWidth = 0;
 const labelHeight = labelFontSize;
 
-// ランダム方向生成（前回とあまり近くならやり直し）
+// ランダム方向生成
 function newDirection() {
   let angle;
   do {
@@ -76,12 +72,12 @@ canvas.addEventListener("click", (e) => {
   const clickY = (e.clientY - rect.top) * scaleY;
 
   // 🥺クリック判定
-if (
-  clickX >= tapLabelX - labelWidth &&
-  clickX <= tapLabelX &&
-  clickY >= tapLabelY &&
-  clickY <= tapLabelY + labelHeight
-) {
+  if (
+    clickX >= x - emojiRadius &&
+    clickX <= x + emojiRadius &&
+    clickY >= y - emojiRadius &&
+    clickY <= y + emojiRadius
+  ) {
     const angle = newDirection();
     const speed = 2.0;
     dx = Math.cos(angle) * speed;
@@ -89,13 +85,15 @@ if (
     puyuyu += clickValue;
   }
 
-// 壁タッチクリック判定
-if (
-  clickX >= wallLabelX - wallLabelWidth &&
-  clickX <= wallLabelX &&
-  clickY >= wallLabelY &&
-  clickY <= wallLabelY + labelHeight
-) {
+  // 壁タッチクリック判定（右端基準）
+  const wallLabelX = canvas.width - 10; // 右端10px内側
+  const wallLabelY = canvas.height - 80;
+  if (
+    clickX >= wallLabelX - wallLabelWidth &&
+    clickX <= wallLabelX &&
+    clickY >= wallLabelY &&
+    clickY <= wallLabelY + labelHeight
+  ) {
     if (puyuyu >= wallCost) {
       puyuyu -= wallCost;
       wallLevel++;
@@ -104,14 +102,15 @@ if (
     }
   }
 
- 
-// タップクリック判定
-if (
-  clickX >= tapLabelX - labelWidth &&
-  clickX <= tapLabelX &&
-  clickY >= tapLabelY &&
-  clickY <= tapLabelY + labelHeight
-) {
+  // タップ強化クリック判定（右端基準）
+  const tapLabelX = canvas.width - 10; // 右端10px内側
+  const tapLabelY = canvas.height - 40;
+  if (
+    clickX >= tapLabelX - tapLabelWidth &&
+    clickX <= tapLabelX &&
+    clickY >= tapLabelY &&
+    clickY <= tapLabelY + labelHeight
+  ) {
     if (puyuyu >= upgradeCost) {
       puyuyu -= upgradeCost;
       upgradeLevel++;
@@ -122,6 +121,9 @@ if (
 });
 
 // 描画・更新ループ
+let wallLabelWidth = 0;
+let tapLabelWidth = 0;
+
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -157,36 +159,35 @@ function update() {
   ctx.fillText("🥺 " + puyuyu, 8, 8);
   ctx.restore();
 
-// 壁タッチボタン描画（右端基準）
-const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
-const wallLabelX = canvas.width - 10; // 右端から10px内側
-const wallLabelY = canvas.height - 80;
-ctx.save();
-ctx.font = `${labelFontSize}px sans-serif`;
-ctx.textAlign = "right"; // ←右端基準
-ctx.textBaseline = "top";
-ctx.fillStyle = "#000";
-ctx.globalAlpha = 0.7;
-ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
-ctx.globalAlpha = 1.0;
-wallLabelWidth = ctx.measureText(wallLabelText).width;
-ctx.restore();
+  // 壁タッチボタン描画（右端基準）
+  const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
+  const wallLabelX = canvas.width - 10;
+  const wallLabelY = canvas.height - 80;
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#000";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
+  ctx.globalAlpha = 1.0;
+  wallLabelWidth = ctx.measureText(wallLabelText).width;
+  ctx.restore();
 
-// タップ強化ボタン描画（右端基準）
-const tapLabelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
-const tapLabelX = canvas.width - 10; // 右端から10px内側
-const tapLabelY = canvas.height - 40;
-ctx.save();
-ctx.font = `${labelFontSize}px sans-serif`;
-ctx.textAlign = "right"; // ←右端基準
-ctx.textBaseline = "top";
-ctx.fillStyle = "#000";
-ctx.globalAlpha = 0.7;
-ctx.fillText(tapLabelText, tapLabelX, tapLabelY);
-ctx.globalAlpha = 1.0;
-labelWidth = ctx.measureText(tapLabelText).width;
-ctx.restore();
-
+  // タップ強化ボタン描画（右端基準）
+  const tapLabelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
+  const tapLabelX = canvas.width - 10;
+  const tapLabelY = canvas.height - 40;
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#000";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(tapLabelText, tapLabelX, tapLabelY);
+  ctx.globalAlpha = 1.0;
+  tapLabelWidth = ctx.measureText(tapLabelText).width;
+  ctx.restore();
 
   requestAnimationFrame(update);
 }
