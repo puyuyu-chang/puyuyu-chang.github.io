@@ -57,6 +57,7 @@
   margin-left: 0;                /* ← もともと margin-left: auto; を置き換え */
     text-align: left;              /* ← 左詰め表示のために追加 */
     font-size: 13px;
+      margin-left: 6px;
   }
   /* 閉上下のテキストエリア */
   #shopControls {
@@ -151,7 +152,7 @@
       div.innerHTML = `
         <span class="icon">${item.icon}</span>
         <span>${item.icon}を${item.effect}%効率化</span>
-        <span class="price">  🥺${item.price}</span>
+        <span class="price">🥺${item.price}</span>
       `;
       div.addEventListener("click", () => buyItem(start + index));
       shopItemsDiv.appendChild(div);
