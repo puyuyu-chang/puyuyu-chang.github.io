@@ -28,11 +28,15 @@
 .shopItem {
   display: flex;
   align-items: center;
+ 
+  align-items: flex-start;       /* ← もともと align-items: center; の直後に追加 */
+  justify-content: flex-start;   /* ← display:flex の直後に追加 */
+  
   background: #FFFFEE;
   margin: 4px 0;
   padding: 0 6px;          /* 上下パディングをなくして比率維持 */
   aspect-ratio: 9 / 1;    /* 幅9 : 高さ1 */
-  border-radius: 6px;
+  border-radius: 0px;
   cursor: pointer;
   font-size: 14px;
 }
@@ -42,8 +46,9 @@
     margin-right: 8px;
   }
   .shopItem span.price {
-    margin-left: auto;
-    font-size: 13px; /* 値段は小さめ */
+  margin-left: 0;                /* ← もともと margin-left: auto; を置き換え */
+    text-align: left;              /* ← 左詰め表示のために追加 */
+    font-size: 13px;
   }
   /* 閉上下のテキストエリア */
   #shopControls {
