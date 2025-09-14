@@ -40,6 +40,11 @@
     let clickValue = 1;
     let upgradeLevel = 1;
     let upgradeCost = 50;
+    
+    let wallLevel = 1;        // 壁タッチ強化レベル
+let wallCost = 100;       // 初期コスト
+let wallValue = 0;        // 壁に跳ね返ったときに獲得するpuyuyu
+
 
     // 強化ボタン表示位置・サイズ
     const labelFontSize = 22;
@@ -99,6 +104,7 @@
       }
     });
 
+    
     // 描画・更新ループ
     function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -107,15 +113,18 @@
       x += dx;
       y += dy;
 
-      // 壁バウンド
-      if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
-        dx = -dx;
-        x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
-      }
-      if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
-        dy = -dy;
-        y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
-      }
+// 壁バウンド
+if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
+  dx = -dx;
+  x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
+  puyuyu += wallValue;   // ←壁バウンド時にポイント加算
+}
+if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
+  dy = -dy;
+  y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
+  puyuyu += wallValue;
+}
+
 
       // 🥺描画
       ctx.save();
@@ -147,6 +156,36 @@
       labelWidth = ctx.measureText(labelText).width;
       ctx.restore();
 
+      const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
+const wallLabelX = canvas.width - 200;
+const wallLabelY = canvas.height - 80; // タップ強化の上に表示
+
+ctx.save();
+ctx.font = `${labelFontSize}px sans-serif`;
+ctx.textAlign = "left";
+ctx.textBaseline = "top";
+ctx.fillStyle = "#000";
+ctx.globalAlpha = 0.7;
+ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
+ctx.globalAlpha = 1.0;
+wallLabelWidth = ctx.measureText(wallLabelText).width; // 判定用
+ctx.restore();
+
+if (
+  clickX >= wallLabelX &&
+  clickX <= wallLabelX + wallLabelWidth &&
+  clickY >= wallLabelY &&
+  clickY <= wallLabelY + labelHeight
+) {
+  if (puyuyu >= wallCost) {
+    puyuyu -= wallCost;
+    wallLevel++;
+    wallCost = Math.floor(wallCost + wallCost * 0.1);
+    wallValue = Math.floor(wallValue + wallValue * 0.1) + 1; // タップ強化と同じ計算式
+  }
+}
+
+      
       requestAnimationFrame(update);
     }
 
