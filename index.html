@@ -27,19 +27,18 @@
 }
 
 .shopItem {
-  display: flex;
-  align-items: center;
- 
-  align-items: flex-start;       /* ← もともと align-items: center; の直後に追加 */
-  justify-content: flex-start;   /* ← display:flex の直後に追加 */
-  
+  transform-origin: left top;
+  transform: translate(-20px, -20px);
+
+    display: flex;
   background: #FFFFEE;
   margin: 4px 0;
-  padding: 0 6px;          /* 上下パディングをなくして比率維持 */
-  aspect-ratio: 9 / 1;    /* 幅9 : 高さ1 */
-  border-radius: 0px;
+  padding: 6px;
+  border-radius: 0;
   cursor: pointer;
   font-size: 14px;
+  
+
 }
 
   .shopItem span.icon {
