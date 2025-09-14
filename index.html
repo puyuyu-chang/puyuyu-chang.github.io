@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>ショップCanvas風サンプル</title>
 <style>
   body {
     background: #ffffdd;
@@ -13,11 +8,10 @@
     top: 50px;
     left: 50%;
     transform: translateX(-50%);
-    width: 480px;       /* 元画像の比率に近づけた幅 */
-    height: 420px;      /* 縦も調整 */
-    background: #fff9c4;
-    border: 4px solid #333;
-    border-radius: 8px;
+    width: 612px;        /* 元画像比率に合わせたサイズ */
+    height: 400px;
+    background: #fff9c4; /* 背景色のみ、枠線なし */
+    border-radius: 4px;
     padding: 10px;
     display: none; /* 最初は非表示 */
     box-sizing: border-box;
@@ -35,14 +29,13 @@
     font-size: 14px;
   }
   .shopItem span.icon {
-    font-size: 22px;  /* アイコンを大きめに */
+    font-size: 22px;  /* アイコン大きめ */
     margin-right: 8px;
   }
   .shopItem span.price {
     margin-left: auto;
-    font-size: 13px; /* 値段は小さめ */
+    font-size: 13px; /* 値段小さめ */
   }
-  /* 閉上下のテキストエリア */
   #shopControls {
     position: absolute;
     top: 10px;
@@ -60,98 +53,3 @@
     color: red;
   }
 </style>
-</head>
-<body>
-  <button id="openShopBtn">ショップ</button>
-
-  <div id="shopContainer">
-    <div id="shopItems"></div>
-    <div id="shopControls">
-      <div id="closeBtn">閉</div>
-      <div id="upBtn">上</div>
-      <div id="downBtn">下</div>
-    </div>
-  </div>
-
-<script>
-  // 所持通貨（デバッグ用）
-  let puyuyu = 2000000000;
-
-  // ショップアイテム
-  const shopItems = [
-    {icon:"😃", effect:10, price:10000},
-    {icon:"😡", effect:20, price:100000},
-    {icon:"🤔", effect:30, price:1000000},
-    {icon:"😭", effect:40, price:10000000},
-    {icon:"😎", effect:50, price:100000000},
-    {icon:"😆", effect:60, price:1000000000},
-    {icon:"😫", effect:70, price:10000000000},
-    {icon:"🤢", effect:80, price:100000000000},
-    {icon:"😇", effect:90, price:1000000000000},
-    {icon:"👿", effect:100, price:10000000000000},
-  ];
-
-  const shopContainer = document.getElementById("shopContainer");
-  const shopItemsDiv = document.getElementById("shopItems");
-
-  const itemsPerPage = 8;
-  let currentPage = 0;
-
-  // ショップを開く
-  document.getElementById("openShopBtn").addEventListener("click", () => {
-    shopContainer.style.display = "block";
-    renderShop();
-  });
-
-  // 閉じる
-  document.getElementById("closeBtn").addEventListener("click", () => {
-    shopContainer.style.display = "none";
-  });
-
-  // ページ切り替え
-  document.getElementById("upBtn").addEventListener("click", () => {
-    if (currentPage > 0) {
-      currentPage--;
-      renderShop();
-    }
-  });
-  document.getElementById("downBtn").addEventListener("click", () => {
-    if ((currentPage + 1) * itemsPerPage < shopItems.length) {
-      currentPage++;
-      renderShop();
-    }
-  });
-
-  // アイテム描画
-  function renderShop() {
-    shopItemsDiv.innerHTML = "";
-    const start = currentPage * itemsPerPage;
-    const end = start + itemsPerPage;
-    const visibleItems = shopItems.slice(start, end);
-
-    visibleItems.forEach((item, index) => {
-      const div = document.createElement("div");
-      div.className = "shopItem";
-      div.innerHTML = `
-        <span class="icon">${item.icon}</span>
-        <span>${item.icon}を${item.effect}%効率化</span>
-        <span class="price">🥺${item.price}</span>
-      `;
-      div.addEventListener("click", () => buyItem(start + index));
-      shopItemsDiv.appendChild(div);
-    });
-  }
-
-  // 購入処理
-  function buyItem(index) {
-    const item = shopItems[index];
-    if (puyuyu >= item.price) {
-      puyuyu -= item.price;
-      alert(`${item.icon} を購入しました！ 残り: 🥺${puyuyu}`);
-    } else {
-      alert("🥺が足りません！");
-    }
-  }
-</script>
-</body>
-</html>
