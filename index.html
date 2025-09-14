@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ショップDOMページ切り替えサンプル</title>
+<title>ショップCanvas風サンプル</title>
 <style>
   body {
     background: #ffffdd;
@@ -13,46 +13,51 @@
     top: 50px;
     left: 50%;
     transform: translateX(-50%);
-    width: 350px;
-    height: 300px;
+    width: 480px;       /* 元画像の比率に近づけた幅 */
+    height: 420px;      /* 縦も調整 */
     background: #fff9c4;
     border: 4px solid #333;
     border-radius: 8px;
     padding: 10px;
     display: none; /* 最初は非表示 */
     box-sizing: border-box;
-    overflow: hidden; /* ページ切り替えで高さ固定 */
-  }
-  #shopItems {
-    margin-right: 70px; /* ボタンの分だけ右に余白 */
+    overflow: hidden;
+    position: relative;
   }
   .shopItem {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     background: #ffffee;
-    margin: 5px 0;
+    margin: 4px 0;
     padding: 6px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 14px;
   }
-  .shopItem:hover {
-    background: #ffee99;
+  .shopItem span.icon {
+    font-size: 22px;  /* アイコンを大きめに */
+    margin-right: 8px;
   }
-  #shopButtons {
+  .shopItem span.price {
+    margin-left: auto;
+    font-size: 13px; /* 値段は小さめ */
+  }
+  /* 閉上下のテキストエリア */
+  #shopControls {
     position: absolute;
     top: 10px;
     right: 10px;
     display: flex;
-    flex-direction: column; /* 縦並び */
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
-  }
-  #shopButtons button {
-    writing-mode: vertical-rl; /* 縦書きっぽく配置 */
-    text-orientation: upright;
-    padding: 4px;
-    font-size: 16px;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
+    user-select: none;
+  }
+  #shopControls div:hover {
+    color: red;
   }
 </style>
 </head>
@@ -61,18 +66,18 @@
 
   <div id="shopContainer">
     <div id="shopItems"></div>
-    <div id="shopButtons">
-      <button id="closeShopBtn">閉</button>
-      <button id="upBtn">上</button>
-      <button id="downBtn">下</button>
+    <div id="shopControls">
+      <div id="closeBtn">閉</div>
+      <div id="upBtn">上</div>
+      <div id="downBtn">下</div>
     </div>
   </div>
 
 <script>
-  // プレイヤー所持（デバッグ用）
-  let puyuyu = 200000;
+  // 所持通貨（デバッグ用）
+  let puyuyu = 2000000000;
 
-  // ショップアイテムデータ
+  // ショップアイテム
   const shopItems = [
     {icon:"😃", effect:10, price:10000},
     {icon:"😡", effect:20, price:100000},
@@ -82,12 +87,14 @@
     {icon:"😆", effect:60, price:1000000000},
     {icon:"😫", effect:70, price:10000000000},
     {icon:"🤢", effect:80, price:100000000000},
+    {icon:"😇", effect:90, price:1000000000000},
+    {icon:"👿", effect:100, price:10000000000000},
   ];
 
   const shopContainer = document.getElementById("shopContainer");
   const shopItemsDiv = document.getElementById("shopItems");
 
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
   let currentPage = 0;
 
   // ショップを開く
@@ -97,7 +104,7 @@
   });
 
   // 閉じる
-  document.getElementById("closeShopBtn").addEventListener("click", () => {
+  document.getElementById("closeBtn").addEventListener("click", () => {
     shopContainer.style.display = "none";
   });
 
@@ -108,7 +115,6 @@
       renderShop();
     }
   });
-
   document.getElementById("downBtn").addEventListener("click", () => {
     if ((currentPage + 1) * itemsPerPage < shopItems.length) {
       currentPage++;
@@ -127,8 +133,9 @@
       const div = document.createElement("div");
       div.className = "shopItem";
       div.innerHTML = `
-        <span>${item.icon} を${item.effect}%効率化</span>
-        <span>🥺${item.price}</span>
+        <span class="icon">${item.icon}</span>
+        <span>${item.icon}を${item.effect}%効率化</span>
+        <span class="price">🥺${item.price}</span>
       `;
       div.addEventListener("click", () => buyItem(start + index));
       shopItemsDiv.appendChild(div);
