@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ショップDOMサンプル</title>
+<title>ショップDOMページ切り替えサンプル</title>
 <style>
   body {
     background: #ffffdd;
@@ -13,14 +13,18 @@
     top: 50px;
     left: 50%;
     transform: translateX(-50%);
-    width: 300px;
-    max-height: 400px;
+    width: 350px;
+    height: 300px;
     background: #fff9c4;
     border: 4px solid #333;
     border-radius: 8px;
     padding: 10px;
     display: none; /* 最初は非表示 */
-    overflow-y: auto; /* アイテムが多い場合スクロール */
+    box-sizing: border-box;
+    overflow: hidden; /* ページ切り替えで高さ固定 */
+  }
+  #shopItems {
+    margin-right: 70px; /* ボタンの分だけ右に余白 */
   }
   .shopItem {
     display: flex;
@@ -35,10 +39,20 @@
   .shopItem:hover {
     background: #ffee99;
   }
-  .shopButtons {
+  #shopButtons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
+    flex-direction: column; /* 縦並び */
+    gap: 10px;
+  }
+  #shopButtons button {
+    writing-mode: vertical-rl; /* 縦書きっぽく配置 */
+    text-orientation: upright;
+    padding: 4px;
+    font-size: 16px;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -47,13 +61,15 @@
 
   <div id="shopContainer">
     <div id="shopItems"></div>
-    <div class="shopButtons">
-      <button id="closeShopBtn">閉じる</button>
+    <div id="shopButtons">
+      <button id="closeShopBtn">閉</button>
+      <button id="upBtn">上</button>
+      <button id="downBtn">下</button>
     </div>
   </div>
 
 <script>
-  // プレイヤーの所持数（デバッグ用）
+  // プレイヤー所持（デバッグ用）
   let puyuyu = 200000;
 
   // ショップアイテムデータ
@@ -71,28 +87,50 @@
   const shopContainer = document.getElementById("shopContainer");
   const shopItemsDiv = document.getElementById("shopItems");
 
+  const itemsPerPage = 4;
+  let currentPage = 0;
+
   // ショップを開く
   document.getElementById("openShopBtn").addEventListener("click", () => {
     shopContainer.style.display = "block";
     renderShop();
   });
 
-  // ショップを閉じる
+  // 閉じる
   document.getElementById("closeShopBtn").addEventListener("click", () => {
     shopContainer.style.display = "none";
+  });
+
+  // ページ切り替え
+  document.getElementById("upBtn").addEventListener("click", () => {
+    if (currentPage > 0) {
+      currentPage--;
+      renderShop();
+    }
+  });
+
+  document.getElementById("downBtn").addEventListener("click", () => {
+    if ((currentPage + 1) * itemsPerPage < shopItems.length) {
+      currentPage++;
+      renderShop();
+    }
   });
 
   // アイテム描画
   function renderShop() {
     shopItemsDiv.innerHTML = "";
-    shopItems.forEach((item, index) => {
+    const start = currentPage * itemsPerPage;
+    const end = start + itemsPerPage;
+    const visibleItems = shopItems.slice(start, end);
+
+    visibleItems.forEach((item, index) => {
       const div = document.createElement("div");
       div.className = "shopItem";
       div.innerHTML = `
         <span>${item.icon} を${item.effect}%効率化</span>
         <span>🥺${item.price}</span>
       `;
-      div.addEventListener("click", () => buyItem(index));
+      div.addEventListener("click", () => buyItem(start + index));
       shopItemsDiv.appendChild(div);
     });
   }
@@ -102,8 +140,7 @@
     const item = shopItems[index];
     if (puyuyu >= item.price) {
       puyuyu -= item.price;
-      alert(`${item.icon} を購入しました！ 所持: 🥺${puyuyu}`);
-      // 効果反映処理をここに書く（クリック強化とか）
+      alert(`${item.icon} を購入しました！ 残り: 🥺${puyuyu}`);
     } else {
       alert("🥺が足りません！");
     }
