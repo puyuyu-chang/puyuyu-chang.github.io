@@ -1,220 +1,113 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>🥺バウンド（右端基準・デバッグ＆ショップ追加）</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-      margin: 0;
-      background: #ffffdd;
-    }
-    canvas {
-      border: 6px solid black;
-      margin-top: 40px;
-      image-rendering: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>ショップDOMサンプル</title>
+<style>
+  body {
+    background: #ffffdd;
+    font-family: sans-serif;
+  }
+  #shopContainer {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    max-height: 400px;
+    background: #fff9c4;
+    border: 4px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    display: none; /* 最初は非表示 */
+    overflow-y: auto; /* アイテムが多い場合スクロール */
+  }
+  .shopItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffee;
+    margin: 5px 0;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .shopItem:hover {
+    background: #ffee99;
+  }
+  .shopButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+</style>
 </head>
 <body>
-<canvas id="game" width="450" height="450"></canvas>
+  <button id="openShopBtn">ショップ</button>
+
+  <div id="shopContainer">
+    <div id="shopItems"></div>
+    <div class="shopButtons">
+      <button id="closeShopBtn">閉じる</button>
+    </div>
+  </div>
+
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+  // プレイヤーの所持数（デバッグ用）
+  let puyuyu = 200000;
 
-// 🥺関連
-const emoji = "🥺";
-const fontSize = 90;
-const emojiRadius = fontSize / 2;
-let x = canvas.width / 2;
-let y = canvas.height / 2;
-let dx = 0;
-let dy = 0;
-let lastAngle = null;
+  // ショップアイテムデータ
+  const shopItems = [
+    {icon:"😃", effect:10, price:10000},
+    {icon:"😡", effect:20, price:100000},
+    {icon:"🤔", effect:30, price:1000000},
+    {icon:"😭", effect:40, price:10000000},
+    {icon:"😎", effect:50, price:100000000},
+    {icon:"😆", effect:60, price:1000000000},
+    {icon:"😫", effect:70, price:10000000000},
+    {icon:"🤢", effect:80, price:100000000000},
+  ];
 
-// スコア & 強化
-let puyuyu = 0;
-let clickValue = 1;
-let upgradeLevel = 1;
-let upgradeCost = 50;
+  const shopContainer = document.getElementById("shopContainer");
+  const shopItemsDiv = document.getElementById("shopItems");
 
-// 壁タッチ強化
-let wallLevel = 1;
-let wallCost = 100;
-let wallValue = 0;
+  // ショップを開く
+  document.getElementById("openShopBtn").addEventListener("click", () => {
+    shopContainer.style.display = "block";
+    renderShop();
+  });
 
-// 強化ボタン表示サイズ
-const labelFontSize = 22;
-const labelHeight = labelFontSize;
+  // ショップを閉じる
+  document.getElementById("closeShopBtn").addEventListener("click", () => {
+    shopContainer.style.display = "none";
+  });
 
-// ラベル幅（クリック判定用）
-let wallLabelWidth = 0;
-let tapLabelWidth = 0;
-
-// ランダム方向生成
-function newDirection() {
-  let angle;
-  do {
-    angle = Math.random() * 2 * Math.PI;
-  } while (
-    lastAngle !== null &&
-    Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
-  );
-  lastAngle = angle;
-  return angle;
-}
-
-// キーイベント（Dキーでデバッグpuyuyu2倍）
-document.addEventListener("keydown", (e) => {
-  if (e.key === "d" || e.key === "D") {
-    puyuyu *= 2;
-  }
-});
-
-// クリックイベント（中央🥺と強化ボタン）
-canvas.addEventListener("click", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const clickX = (e.clientX - rect.left) * scaleX;
-  const clickY = (e.clientY - rect.top) * scaleY;
-
-  // 🥺クリック判定
-  if (
-    clickX >= x - emojiRadius &&
-    clickX <= x + emojiRadius &&
-    clickY >= y - emojiRadius &&
-    clickY <= y + emojiRadius
-  ) {
-    const angle = newDirection();
-    const speed = 2.0;
-    dx = Math.cos(angle) * speed;
-    dy = Math.sin(angle) * speed;
-    puyuyu += clickValue;
+  // アイテム描画
+  function renderShop() {
+    shopItemsDiv.innerHTML = "";
+    shopItems.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "shopItem";
+      div.innerHTML = `
+        <span>${item.icon} を${item.effect}%効率化</span>
+        <span>🥺${item.price}</span>
+      `;
+      div.addEventListener("click", () => buyItem(index));
+      shopItemsDiv.appendChild(div);
+    });
   }
 
-  // 壁タッチクリック判定
-  const wallLabelX = canvas.width - 10; // 右端基準
-  const wallLabelY = canvas.height - 80;
-  if (
-    clickX >= wallLabelX - wallLabelWidth &&
-    clickX <= wallLabelX &&
-    clickY >= wallLabelY &&
-    clickY <= wallLabelY + labelHeight
-  ) {
-    if (puyuyu >= wallCost) {
-      puyuyu -= wallCost;
-      wallLevel++;
-      wallCost = Math.floor(wallCost + wallCost * 0.1);
-      wallValue = Math.floor(wallValue + wallValue * 0.1) + 1;
+  // 購入処理
+  function buyItem(index) {
+    const item = shopItems[index];
+    if (puyuyu >= item.price) {
+      puyuyu -= item.price;
+      alert(`${item.icon} を購入しました！ 所持: 🥺${puyuyu}`);
+      // 効果反映処理をここに書く（クリック強化とか）
+    } else {
+      alert("🥺が足りません！");
     }
   }
-
-  // タップ強化クリック判定
-  const tapLabelX = canvas.width - 10;
-  const tapLabelY = canvas.height - 40;
-  if (
-    clickX >= tapLabelX - tapLabelWidth &&
-    clickX <= tapLabelX &&
-    clickY >= tapLabelY &&
-    clickY <= tapLabelY + labelHeight
-  ) {
-    if (puyuyu >= upgradeCost) {
-      puyuyu -= upgradeCost;
-      upgradeLevel++;
-      upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
-      clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
-    }
-  }
-});
-
-// 描画・更新ループ
-function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 🥺位置更新
-  x += dx;
-  y += dy;
-
-  // 壁バウンド
-  if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
-    dx = -dx;
-    x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
-    puyuyu += wallValue;
-  }
-  if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
-    dy = -dy;
-    y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
-    puyuyu += wallValue;
-  }
-
-  // 🥺描画
-  ctx.save();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = fontSize + "px serif";
-  ctx.fillText(emoji, x, y);
-  ctx.restore();
-
-  // スコア表示（左上）
-  ctx.save();
-  ctx.font = "22px sans-serif";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillText("🥺 " + puyuyu, 8, 8);
-  ctx.restore();
-
-  // 「ショップ」表示（壁タッチ上）
-  const shopText = "ショップ";
-  const shopX = canvas.width - 10;
-  const shopY = canvas.height - 110;
-  ctx.save();
-  ctx.font = `${labelFontSize}px sans-serif`;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#000";
-  ctx.globalAlpha = 0.7;
-  ctx.fillText(shopText, shopX, shopY);
-  ctx.globalAlpha = 1.0;
-  ctx.restore();
-
-  // 壁タッチボタン描画（右端基準）
-  const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
-  const wallLabelX = canvas.width - 10;
-  const wallLabelY = canvas.height - 80;
-  ctx.save();
-  ctx.font = `${labelFontSize}px sans-serif`;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#000";
-  ctx.globalAlpha = 0.7;
-  ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
-  ctx.globalAlpha = 1.0;
-  wallLabelWidth = ctx.measureText(wallLabelText).width;
-  ctx.restore();
-
-  // タップ強化ボタン描画（右端基準）
-  const tapLabelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
-  const tapLabelX = canvas.width - 10;
-  const tapLabelY = canvas.height - 40;
-  ctx.save();
-  ctx.font = `${labelFontSize}px sans-serif`;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#000";
-  ctx.globalAlpha = 0.7;
-  ctx.fillText(tapLabelText, tapLabelX, tapLabelY);
-  ctx.globalAlpha = 1.0;
-  tapLabelWidth = ctx.measureText(tapLabelText).width;
-  ctx.restore();
-
-  requestAnimationFrame(update);
-}
-
-update();
 </script>
 </body>
 </html>
