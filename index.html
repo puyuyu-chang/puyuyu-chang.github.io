@@ -12,7 +12,8 @@
   position: fixed;
   top: 50px;
   left: 50%;
-  transform: translateX(-50%);
+  transform-origin: left top;
+  transform: translate(-50%, 0);
   width: 400px;        /* 幅 */
   height: 400px;       /* 高さを幅と同じにして1:1の正方形 */
   background: #FFF9C4;
@@ -23,6 +24,7 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  
 }
 
 .shopItem {
