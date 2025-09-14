@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>🥺バウンド（クリック強化付き）</title>
+  <title>🥺バウンド（壁タッチ＆クリック強化付き）</title>
   <style>
     body {
       display: flex;
@@ -20,172 +20,176 @@
   </style>
 </head>
 <body>
-  <canvas id="game" width="450" height="450"></canvas>
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+<canvas id="game" width="450" height="450"></canvas>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    // 🥺関連
-    const emoji = "🥺";
-    const fontSize = 90;
-    const emojiRadius = fontSize / 2;
-    let x = canvas.width / 2;
-    let y = canvas.height / 2;
-    let dx = 0;
-    let dy = 0;
-    let lastAngle = null;
+// 🥺関連
+const emoji = "🥺";
+const fontSize = 90;
+const emojiRadius = fontSize / 2;
+let x = canvas.width / 2;
+let y = canvas.height / 2;
+let dx = 0;
+let dy = 0;
+let lastAngle = null;
 
-    // スコア & 強化
-    let puyuyu = 0;
-    let clickValue = 1;
-    let upgradeLevel = 1;
-    let upgradeCost = 50;
-    
-    let wallLevel = 1;        // 壁タッチ強化レベル
-let wallCost = 100;       // 初期コスト
-let wallValue = 0;        // 壁に跳ね返ったときに獲得するpuyuyu
+// スコア & 強化
+let puyuyu = 0;
+let clickValue = 1;
+let upgradeLevel = 1;
+let upgradeCost = 50;
 
+// 壁タッチ強化
+let wallLevel = 1;
+let wallCost = 100;
+let wallValue = 0;
+let wallLabelWidth = 0;
 
-    // 強化ボタン表示位置・サイズ
-    const labelFontSize = 22;
-    const labelX = canvas.width - 200;
-    const labelY = canvas.height - 40;
-    let labelWidth = 0;
-    const labelHeight = labelFontSize;
+// 強化ボタン表示位置・サイズ
+const labelFontSize = 22;
+const labelX = canvas.width - 200;
+const labelY = canvas.height - 40;
+let labelWidth = 0;
+const labelHeight = labelFontSize;
 
-    // ランダム方向生成（前回とあまり近くならやり直し）
-    function newDirection() {
-      let angle;
-      do {
-        angle = Math.random() * 2 * Math.PI;
-      } while (
-        lastAngle !== null &&
-        Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
-      );
-      lastAngle = angle;
-      return angle;
-    }
+// ランダム方向生成（前回とあまり近くならやり直し）
+function newDirection() {
+  let angle;
+  do {
+    angle = Math.random() * 2 * Math.PI;
+  } while (
+    lastAngle !== null &&
+    Math.abs(Math.atan2(Math.sin(angle - lastAngle), Math.cos(angle - lastAngle))) < (Math.PI / 3)
+  );
+  lastAngle = angle;
+  return angle;
+}
 
-    // クリックイベント（中央🥺と強化ボタン）
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const clickX = (e.clientX - rect.left) * scaleX;
-      const clickY = (e.clientY - rect.top) * scaleY;
+// クリックイベント（中央🥺と強化ボタン）
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const clickX = (e.clientX - rect.left) * scaleX;
+  const clickY = (e.clientY - rect.top) * scaleY;
 
-      
-      // 🥺クリック判定
-      if (
-        clickX >= x - emojiRadius &&
-        clickX <= x + emojiRadius &&
-        clickY >= y - emojiRadius &&
-        clickY <= y + emojiRadius
-      ) {
-        const angle = newDirection();
-        const speed = 2.0;
-        dx = Math.cos(angle) * speed;
-        dy = Math.sin(angle) * speed;
-        puyuyu += clickValue;
-      }
-
-            // 壁タッチボタンのクリック判定
-if (
-  clickX >= wallLabelX &&
-  clickX <= wallLabelX + wallLabelWidth &&
-  clickY >= wallLabelY &&
-  clickY <= wallLabelY + labelHei
-  
-  
-  
-  ght
-) {
-  if (puyuyu >= wallCost) {
-    puyuyu -= wallCost;
-    wallLevel++;
-    wallCost = Math.floor(wallCost + wallCost * 0.1);
-    wallValue = Math.floor(wallValue + wallValue * 0.1) + 1; // タップ強化と同じ計算式
+  // 🥺クリック判定
+  if (
+    clickX >= x - emojiRadius &&
+    clickX <= x + emojiRadius &&
+    clickY >= y - emojiRadius &&
+    clickY <= y + emojiRadius
+  ) {
+    const angle = newDirection();
+    const speed = 2.0;
+    dx = Math.cos(angle) * speed;
+    dy = Math.sin(angle) * speed;
+    puyuyu += clickValue;
   }
-}
 
-      
-      // 強化ボタンクリック判定
-      if (
-        clickX >= labelX &&
-        clickX <= labelX + labelWidth &&
-        clickY >= labelY &&
-        clickY <= labelY + labelHeight
-      ) {
-        if (puyuyu >= upgradeCost) {
-          puyuyu -= upgradeCost;
-          upgradeLevel++;
-          upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
-          clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
-        }
-      }
-    });
-
-    
-    // 描画・更新ループ
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 🥺位置更新
-      x += dx;
-      y += dy;
-
-// 壁バウンド
-if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
-  dx = -dx;
-  x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
-  puyuyu += wallValue;   // ←壁バウンド時にポイント加算
-}
-if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
-  dy = -dy;
-  y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
-  puyuyu += wallValue;
-}
-
-
-
-      
-      // 🥺描画
-      ctx.save();
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = fontSize + "px serif";
-      ctx.fillText(emoji, x, y);
-      ctx.restore();
-
-      // スコア表示（左上）
-      ctx.save();
-      ctx.font = "22px sans-serif";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText("🥺 " + puyuyu, 8, 8);
-      ctx.restore();
-
-      // 強化ボタン描画（右下）
-      const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
-      ctx.save();
-      ctx.font = `${labelFontSize}px sans-serif`;
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "#000";
-      ctx.globalAlpha = 0.7;
-      ctx.fillText(labelText, labelX, labelY);
-      ctx.globalAlpha = 1.0;
-      // 幅を計算して判定に使う
-      labelWidth = ctx.measureText(labelText).width;
-      ctx.restore();
-
-
-
-      
-      requestAnimationFrame(update);
+  // 壁タッチ強化ボタン判定
+  const wallLabelX = canvas.width - 200;
+  const wallLabelY = canvas.height - 80; // タップ強化の上
+  if (
+    clickX >= wallLabelX &&
+    clickX <= wallLabelX + wallLabelWidth &&
+    clickY >= wallLabelY &&
+    clickY <= wallLabelY + labelHeight
+  ) {
+    if (puyuyu >= wallCost) {
+      puyuyu -= wallCost;
+      wallLevel++;
+      wallCost = Math.floor(wallCost + wallCost * 0.1);
+      wallValue = Math.floor(wallValue + wallValue * 0.1) + 1;
     }
+  }
 
-    update();
-  </script>
+  // タップ強化ボタン判定
+  if (
+    clickX >= labelX &&
+    clickX <= labelX + labelWidth &&
+    clickY >= labelY &&
+    clickY <= labelY + labelHeight
+  ) {
+    if (puyuyu >= upgradeCost) {
+      puyuyu -= upgradeCost;
+      upgradeLevel++;
+      upgradeCost = Math.floor(upgradeCost + upgradeCost * 0.1);
+      clickValue = Math.floor(clickValue + clickValue * 0.1) + 1;
+    }
+  }
+});
+
+// 描画・更新ループ
+function update() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 🥺位置更新
+  x += dx;
+  y += dy;
+
+  // 壁バウンド
+  if (x - emojiRadius <= 0 || x + emojiRadius >= canvas.width) {
+    dx = -dx;
+    x = Math.max(emojiRadius, Math.min(x, canvas.width - emojiRadius));
+    puyuyu += wallValue;
+  }
+  if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
+    dy = -dy;
+    y = Math.max(emojiRadius, Math.min(y, canvas.height - emojiRadius));
+    puyuyu += wallValue;
+  }
+
+  // 🥺描画
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = fontSize + "px serif";
+  ctx.fillText(emoji, x, y);
+  ctx.restore();
+
+  // スコア表示（左上）
+  ctx.save();
+  ctx.font = "22px sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText("🥺 " + puyuyu, 8, 8);
+  ctx.restore();
+
+  // 壁タッチボタン描画（右下タップ強化の上）
+  const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
+  const wallLabelX = canvas.width - 200;
+  const wallLabelY = canvas.height - 80;
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#000";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
+  ctx.globalAlpha = 1.0;
+  wallLabelWidth = ctx.measureText(wallLabelText).width;
+  ctx.restore();
+
+  // タップ強化ボタン描画（右下）
+  const labelText = `タップ(Lv${upgradeLevel}) 🥺${upgradeCost}`;
+  ctx.save();
+  ctx.font = `${labelFontSize}px sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#000";
+  ctx.globalAlpha = 0.7;
+  ctx.fillText(labelText, labelX, labelY);
+  ctx.globalAlpha = 1.0;
+  labelWidth = ctx.measureText(labelText).width;
+  ctx.restore();
+
+  requestAnimationFrame(update);
+}
+
+update();
+</script>
 </body>
 </html>
