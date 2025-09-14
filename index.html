@@ -74,7 +74,22 @@ let wallValue = 0;        // 壁に跳ね返ったときに獲得するpuyuyu
       const clickX = (e.clientX - rect.left) * scaleX;
       const clickY = (e.clientY - rect.top) * scaleY;
 
-      // 壁タッチボタンのクリック判定
+      
+      // 🥺クリック判定
+      if (
+        clickX >= x - emojiRadius &&
+        clickX <= x + emojiRadius &&
+        clickY >= y - emojiRadius &&
+        clickY <= y + emojiRadius
+      ) {
+        const angle = newDirection();
+        const speed = 2.0;
+        dx = Math.cos(angle) * speed;
+        dy = Math.sin(angle) * speed;
+        puyuyu += clickValue;
+      }
+
+            // 壁タッチボタンのクリック判定
 if (
   clickX >= wallLabelX &&
   clickX <= wallLabelX + wallLabelWidth &&
@@ -94,20 +109,6 @@ if (
 }
 
       
-      // 🥺クリック判定
-      if (
-        clickX >= x - emojiRadius &&
-        clickX <= x + emojiRadius &&
-        clickY >= y - emojiRadius &&
-        clickY <= y + emojiRadius
-      ) {
-        const angle = newDirection();
-        const speed = 2.0;
-        dx = Math.cos(angle) * speed;
-        dy = Math.sin(angle) * speed;
-        puyuyu += clickValue;
-      }
-
       // 強化ボタンクリック判定
       if (
         clickX >= labelX &&
@@ -145,21 +146,7 @@ if (y - emojiRadius <= 0 || y + emojiRadius >= canvas.height) {
   puyuyu += wallValue;
 }
 
-// 壁タッチボタン描画（右下のタップ強化の上）
-const wallLabelText = `壁タッチ(Lv${wallLevel}) 🥺${wallCost}`;
-const wallLabelX = canvas.width - 200;
-const wallLabelY = canvas.height - 80; // タップ強化の上
 
-ctx.save();
-ctx.font = `${labelFontSize}px sans-serif`;
-ctx.textAlign = "left";
-ctx.textBaseline = "top";
-ctx.fillStyle = "#000";
-ctx.globalAlpha = 0.7;
-ctx.fillText(wallLabelText, wallLabelX, wallLabelY);
-ctx.globalAlpha = 1.0;
-wallLabelWidth = ctx.measureText(wallLabelText).width; // 判定用
-ctx.restore();
 
       
       // 🥺描画
